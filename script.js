@@ -1,17 +1,20 @@
+gsap.registerPlugin(ScrollTrigger);
+
 document.getElementById('year').textContent = new Date().getFullYear();
 
 document.querySelectorAll('a[href^="#"]').forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
     const target = document.querySelector(link.getAttribute('href'));
-    if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+    if (target) {
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+    }
   });
 });
 
 // Mobile Menu Toggle
 const mobileBtn = document.querySelector('.mobile-menu-btn');
 const mobileNav = document.querySelector('.mobile-nav');
-
 if (mobileBtn && mobileNav) {
   mobileBtn.addEventListener('click', () => {
     mobileNav.classList.toggle('is-open');
@@ -37,40 +40,101 @@ if (mobileBtn && mobileNav) {
   });
 }
 
-// Scroll Reveal Animations - Section Specific
-const revealConfigs = [
-  { selector: '.section-kicker, p.lead, .clinic-info p, .training-intro p, .appointment-copy p:not(.section-kicker)', class: 'reveal' },
-  { selector: 'h2', class: 'reveal-left' },
-  { selector: '.expertise-card, .profile-card, .map-card, .appointment-form, .contact-card', class: 'reveal-zoom' },
-  { selector: '.timeline-item, .path-step, .quote-grid figure, .elegant-details .detail-block, .hero-trust-bar', class: 'reveal' },
-];
+// Antigravity Design GSAP Animations
 
-revealConfigs.forEach(config => {
-  document.querySelectorAll(config.selector).forEach(el => {
-    el.classList.add(config.class);
+// 1. Floating Hero Glows (Parallax)
+gsap.to('.hero-glow-a', {
+  yPercent: 40,
+  xPercent: -20,
+  ease: "none",
+  scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 1 }
+});
+gsap.to('.hero-glow-b', {
+  yPercent: -40,
+  xPercent: 20,
+  ease: "none",
+  scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 1 }
+});
+
+// 2. Continuous Floating Elements
+gsap.to('.portrait-frame', {
+  y: -15,
+  rotationX: 2,
+  rotationY: -2,
+  duration: 3,
+  yoyo: true,
+  repeat: -1,
+  ease: "sine.inOut"
+});
+
+gsap.to('.credential-badge', {
+  y: -10,
+  rotationZ: 5,
+  duration: 4,
+  yoyo: true,
+  repeat: -1,
+  ease: "sine.inOut"
+});
+
+// 3. Staggered 3D Entrance for Expertise Cards (Isometric Snapping Vibe)
+gsap.utils.toArray('.expert-card').forEach((card, i) => {
+  gsap.from(card, {
+    scrollTrigger: {
+      trigger: '.expertise-grid',
+      start: "top 80%",
+    },
+    y: 120,
+    z: -300,
+    rotationX: 45,
+    rotationY: -15,
+    opacity: 0,
+    duration: 1.5,
+    ease: "power3.out",
+    delay: i * 0.2
   });
 });
 
-// Staggered Delays for grid children
-const staggerContainers = ['.expertise-grid', '.timeline', '.quote-grid', '.elegant-details'];
-staggerContainers.forEach(selector => {
-  document.querySelectorAll(selector).forEach(container => {
-    Array.from(container.children).forEach((child, index) => {
-      if (child.className.includes('reveal')) {
-        child.style.transitionDelay = `${index * 0.15}s`;
-      }
-    });
+// 4. Glassmorphism Cards Spatial Reveal
+gsap.utils.toArray('.profile-card, .scan-panel, .map-card, .appointment-form').forEach(card => {
+  gsap.from(card, {
+    scrollTrigger: { trigger: card, start: "top 85%" },
+    y: 60,
+    z: -100,
+    opacity: 0,
+    rotationX: 10,
+    duration: 1.2,
+    ease: "power2.out"
   });
 });
 
-// Intersection Observer
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('active');
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+// 5. Staggered Timeline Items
+gsap.from('.timeline-item', {
+  scrollTrigger: { trigger: '.timeline', start: "top 80%" },
+  x: -50,
+  opacity: 0,
+  stagger: 0.15,
+  duration: 1,
+  ease: "power3.out"
+});
 
-document.querySelectorAll('[class*="reveal"]').forEach(el => observer.observe(el));
+// 6. Staggered Quote Cards
+gsap.from('.quote-grid figure', {
+  scrollTrigger: { trigger: '.quote-grid', start: "top 80%" },
+  y: 50,
+  opacity: 0,
+  scale: 0.95,
+  stagger: 0.15,
+  duration: 1,
+  ease: "back.out(1.2)"
+});
+
+// 7. Headings and Kickers
+gsap.utils.toArray('.section-kicker, h2').forEach(el => {
+  gsap.from(el, {
+    scrollTrigger: { trigger: el, start: "top 90%" },
+    y: 30,
+    opacity: 0,
+    duration: 1,
+    ease: "power2.out"
+  });
+});
